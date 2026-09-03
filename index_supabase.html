@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olympius | Plataforma de Estudos de Alta Performance</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FontAwesome Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-indigo {
+            box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER / NAVBAR -->
+    <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-400 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">Olympius</span>
+                    <span class="text-[10px] text-indigo-400 font-semibold tracking-widest uppercase -mt-1">Study Lab</span>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                <a href="#solucao" class="hover:text-indigo-400 transition flex items-center gap-2"><i class="fa-solid fa-layer-group text-xs"></i> Plataforma</a>
+                <a href="#recursos" class="hover:text-indigo-400 transition flex items-center gap-2"><i class="fa-solid fa-bolt text-xs"></i> Recursos</a>
+                
+                <!-- MENU 3 PONTINHOS -->
+                <div class="relative">
+                    <button id="dots-menu-btn" onclick="toggleDotsMenu()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:text-indigo-400 text-slate-300 transition flex items-center justify-center">
+                        <i class="fa-solid fa-ellipsis-vertical text-base"></i>
+                    </button>
+
+                    <!-- Dropdown dos 3 pontinhos -->
+                    <div id="dots-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50">
+                        <div class="px-3 py-2 border-b border-slate-800/80 mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Materiais Olímpicos</span>
+                        </div>
+                        <button onclick="openMaterialsModal('oba')" class="w-full text-left px-3 py-2.5 text-xs font-medium text-slate-200 hover:bg-indigo-600/20 hover:text-indigo-300 rounded-xl transition flex items-center gap-2.5">
+                            <i class="fa-solid fa-meteor text-indigo-400"></i>
+                            <span>Materiais OBA (Astronomia)</span>
+                        </button>
+                        <button onclick="openMaterialsModal('obmep')" class="w-full text-left px-3 py-2.5 text-xs font-medium text-slate-200 hover:bg-violet-600/20 hover:text-violet-300 rounded-xl transition flex items-center gap-2.5">
+                            <i class="fa-solid fa-calculator text-violet-400"></i>
+                            <span>Materiais OBMEP (Matemática)</span>
+                        </button>
+                        <button onclick="openMaterialsModal('obr')" class="w-full text-left px-3 py-2.5 text-xs font-medium text-slate-200 hover:bg-emerald-600/20 hover:text-emerald-300 rounded-xl transition flex items-center gap-2.5">
+                            <i class="fa-solid fa-robot text-emerald-400"></i>
+                            <span>Materiais OBR (Robótica)</span>
+                        </button>
+                        <button onclick="openMaterialsModal('onee')" class="w-full text-left px-3 py-2.5 text-xs font-medium text-slate-200 hover:bg-amber-600/20 hover:text-amber-300 rounded-xl transition flex items-center gap-2.5">
+                            <i class="fa-solid fa-bolt text-amber-400"></i>
+                            <span>Materiais ONEE (Eficiência)</span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <!-- Estado Deslogado -->
+                <div id="nav-guest-actions" class="flex items-center space-x-4">
+                    <button onclick="openAuthModal('login')" class="text-sm font-semibold text-slate-300 hover:text-white transition px-3 py-2">Entrar</button>
+                    <button onclick="openAuthModal('register')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition">Cadastre-se</button>
+                </div>
+                <!-- Estado Logado -->
+                <div id="nav-user-actions" class="hidden items-center space-x-4">
+                    <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-400 text-xs font-semibold">
+                        <i class="fa-solid fa-fire text-amber-500 animate-pulse"></i>
+                        <span>3 dias de ofensiva</span>
+                    </div>
+                    <span class="text-sm text-slate-300">Olá, <strong id="user-display-nav" class="text-indigo-400">Usuário</strong></span>
+                    <button id="logout-btn" onclick="logout()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-800 transition">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODAL DE MATERIAIS -->
+    <div id="materials-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <button onclick="closeMaterialsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
+                <div id="materials-icon" class="p-3 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+                    <i class="fa-solid fa-folder-open text-xl"></i>
+                </div>
+                <div>
+                    <h3 id="materials-title" class="text-xl font-bold text-white">Central de Materiais</h3>
+                    <p class="text-xs text-slate-400">Apostilas, gabaritos e bancos de questões para download.</p>
+                </div>
+            </div>
+
+            <div id="materials-list" class="space-y-3 max-h-[380px] overflow-y-auto pr-2">
+                <!-- Conteúdo dinâmico via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP DE AUTENTICAÇÃO -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex border-b border-slate-800 mb-6">
+                <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 pb-3 font-semibold text-center text-indigo-400 border-b-2 border-indigo-500 transition">Cadastrar-se</button>
+                <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 pb-3 font-semibold text-center text-slate-400 border-b-2 border-transparent transition">Entrar</button>
+            </div>
+
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Novo Usuário</label>
+                    <input type="text" id="reg-username" placeholder="Crie seu nome de usuário" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
+                    <input type="password" id="reg-password" placeholder="Crie uma senha segura" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Confirmar Senha</label>
+                    <input type="password" id="reg-confirm-password" placeholder="Repita a senha" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition text-sm">
+                    Cadastrar e Salvar Conta
+                </button>
+                <p id="reg-msg" class="text-xs text-center mt-2 hidden"></p>
+            </form>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Usuário</label>
+                    <input type="email" id="login-email" placeholder="Digite seu e-mail" required autocomplete="email" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
+                    <input type="password" id="login-password" placeholder="Digite sua senha" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm">
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition text-sm">
+                    Entrar na Conta
+                </button>
+                <p id="login-msg" class="text-xs text-center mt-2 text-rose-500 hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- VISÃO PÚBLICA (LANDING PAGE) -->
+    <div id="public-view">
+        <section class="relative pt-24 pb-20 overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-slate-950 to-slate-950 -z-10"></div>
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <div class="inline-flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-8 animate-pulse">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Ambiente de Estudos de Alta Performance</span>
+                </div>
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+                    Domine as Olimpíadas Científicas com <span class="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">Olympius</span>
+                </h1>
+                <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto font-normal">
+                    Estude de forma inteligente com tutor de IA adaptativo, rotinas pomodoro integradas e uma comunidade ativa de alunos olímpicos.
+                </p>
+                <div class="mt-10 flex justify-center gap-4">
+                    <button onclick="openAuthModal('register')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 transition text-sm flex items-center gap-2">
+                        <span>Iniciar Sua Preparação</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARACTERÍSTICAS / RECURSOS -->
+        <section id="solucao" class="py-20 border-t border-slate-900">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="text-indigo-400 text-xs font-semibold uppercase tracking-wider">Metodologia de Estudos</span>
+                    <h2 class="text-3xl font-bold tracking-tight text-white mt-2">Tecnologia Desenvolvida para Resultados</h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8" id="recursos">
+                    <div class="glass-card p-8 rounded-2xl hover:border-indigo-500/40 transition">
+                        <div class="w-12 h-12 bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center text-xl mb-6">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Feed Colaborativo</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Compartilhamento de resumos, rotinas de estudo e resoluções passo a passo.</p>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-2xl hover:border-indigo-500/40 transition">
+                        <div class="w-12 h-12 bg-violet-600/10 border border-violet-500/20 text-violet-400 rounded-xl flex items-center justify-center text-xl mb-6">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Tutor OlymBot IA</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Orientador inteligente que orienta o raciocínio sem entregar respostas de imediato.</p>
+                    </div>
+
+                    <div class="glass-card p-8 rounded-2xl hover:border-indigo-500/40 transition">
+                        <div class="w-12 h-12 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl mb-6">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-3">Gamificação & Foco</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Acompanhamento de XP, ranking em tempo real e temporizador de estudos integrado.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAINEL PRIVADO / DASHBOARD DO ALUNO COM MENU LATERAL (SIDEBAR) -->
+    <div id="portal-view" class="hidden flex-1 flex flex-col md:flex-row">
+        
+        <!-- MENU LATERAL ESQUERDO (SIDEBAR DAS OLIMPÍADAS) -->
+        <aside class="w-full md:w-64 bg-slate-900/80 border-b md:border-b-0 md:border-r border-slate-800 p-4 shrink-0">
+            <div class="mb-4 px-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Olimpíadas de Estudo</span>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 bg-indigo-600 text-white transition">
+                    <i class="fa-solid fa-house text-sm w-5"></i>
+                    <span>Visão Geral</span>
+                </button>
+                <button onclick="switchTab('oba')" id="nav-tab-oba" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-meteor text-indigo-400 text-sm w-5"></i>
+                    <span>OBA (Astronomia)</span>
+                </button>
+                <button onclick="switchTab('obmep')" id="nav-tab-obmep" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-calculator text-violet-400 text-sm w-5"></i>
+                    <span>OBMEP (Matemática)</span>
+                </button>
+                <button onclick="switchTab('obr')" id="nav-tab-obr" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-robot text-emerald-400 text-sm w-5"></i>
+                    <span>OBR (Robótica)</span>
+                </button>
+                <button onclick="switchTab('onee')" id="nav-tab-onee" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-bolt text-amber-400 text-sm w-5"></i>
+                    <span>ONEE (Eficiência)</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-8">
+            
+            <!-- BANNER PRINCIPAL COM STATUS E CRONÔMETRO POMODORO INTEGRADO -->
+            <div class="glass-card p-6 rounded-2xl shadow-xl flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <span>Central de Estudos</span>
+                        <span id="user-badge-level" class="text-xs px-3 py-1 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-full font-semibold">Nível 1</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Gerencie seu progresso diário, acumule XP e mantenha o foco nas questões olímpicas.</p>
+                </div>
+
+                <!-- WIDGET: CRONÔMETRO POMODORO -->
+                <div class="bg-slate-950/80 border border-slate-800 p-4 rounded-xl flex items-center gap-6 w-full lg:w-auto">
+                    <div class="text-center">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Foco Pomodoro</span>
+                        <span id="pomodoro-timer" class="text-2xl font-mono font-bold text-indigo-400">25:00</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="pomo-start-btn" onclick="togglePomodoro()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+                            <i class="fa-solid fa-play text-[10px]"></i> Iniciar
+                        </button>
+                        <button onclick="resetPomodoro()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-lg transition">
+                            <i class="fa-solid fa-rotate-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BARRA DE PROGRESSO XP -->
+                <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl w-full lg:w-72">
+                    <div class="flex justify-between items-center text-xs text-slate-300 font-semibold mb-2">
+                        <span>Progresso Diário</span>
+                        <span id="xp-text-display" class="text-indigo-400">0 / 100 XP</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="xp-progress-bar" class="bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-2 text-right">Próximo Nível: <span id="next-level-num">Nível 2</span></p>
+                </div>
+            </div>
+
+            <!-- ABA VISÃO GERAL (DASHBOARD) -->
+            <div id="content-tab-dashboard" class="olympiad-tab-content space-y-8">
+                <!-- ESTATÍSTICAS RÁPIDAS DE ESTUDO -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="glass-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Sessão Ativa</h3>
+                            <div class="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span> Em Aprendizado
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-book-open text-2xl text-emerald-500/40"></i>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Conquistas Emuladas</h3>
+                            <div class="text-2xl font-bold text-white"><span id="user-badges-count">0</span> / 4 Medalhas</div>
+                        </div>
+                        <i class="fa-solid fa-award text-2xl text-amber-500/40"></i>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl flex items-center justify-between">
+                        <div>
+                            <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Comunidade de Estudos</h3>
+                            <div class="text-2xl font-bold text-white" id="registered-users-count">0</div>
+                        </div>
+                        <i class="fa-solid fa-users text-2xl text-indigo-500/40"></i>
+                    </div>
+                </div>
+
+                <!-- GRID PRINCIPAL -->
+                <div class="grid lg:grid-cols-3 gap-8">
+                    
+                    <!-- FEED COLABORATIVO E TUTOR IA -->
+                    <div class="lg:col-span-2 space-y-8">
+                        
+                        <!-- 1. FEED DE ESTUDOS -->
+                        <div class="glass-card rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                                <div class="flex items-center space-x-3">
+                                    <div class="bg-indigo-600/20 text-indigo-400 p-2.5 rounded-xl border border-indigo-500/20">
+                                        <i class="fa-solid fa-comments text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-white">Comunidade & Dicas de Estudo</h3>
+                                        <p class="text-xs text-slate-400">Compartilhe insights e questões com outros estudantes (+30 XP por publicação).</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="feed-form" onsubmit="handlePostSubmit(event)" class="space-y-3 mb-6 bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                                <div class="flex gap-2">
+                                    <select id="post-type" class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-indigo-400 font-semibold focus:outline-none focus:border-indigo-500">
+                                        <option value="Dica de Estudo">💡 Dica de Estudo</option>
+                                        <option value="Resolução OBA/OBMEP">🧩 Resolução</option>
+                                        <option value="Rotina de Treino">📅 Planners & Rotinas</option>
+                                    </select>
+                                </div>
+                                <textarea id="post-content" rows="3" placeholder="Compartilhe uma sacada de estudo ou resolução detalhada..." required class="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm resize-none"></textarea>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[11px] text-slate-500">Mantenha as postagens focadas em aprendizado.</span>
+                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20">
+                                        <i class="fa-solid fa-paper-plane text-xs"></i> Publicar (+30 XP)
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div id="feed-posts-container" class="space-y-4 max-h-[420px] overflow-y-auto pr-1"></div>
+                        </div>
+
+                        <!-- 2. TUTOR DE IA INTEGRADO -->
+                        <div class="glass-card rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                                <div class="flex items-center space-x-3">
+                                    <div class="bg-violet-600/20 text-violet-400 p-2.5 rounded-xl border border-violet-500/20">
+                                        <i class="fa-solid fa-robot text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-bold text-white">Tutor Pedagógico (OlymBot)</h3>
+                                        <p class="text-xs text-slate-400">Receba orientações passo a passo para resolver questões difíceis (+20 XP).</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col h-[360px] bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+                                <div id="chat-box" class="flex-1 overflow-y-auto space-y-3 pr-1 text-sm">
+                                    <div class="flex items-start gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center text-white text-xs shrink-0">
+                                            <i class="fa-solid fa-robot"></i>
+                                        </div>
+                                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl rounded-tl-none text-slate-300 max-w-[85%] text-xs leading-relaxed">
+                                            Olá! Sou o OlymBot. Digite a questão de Matemática ou Astronomia que deseja analisar para receber dicas de resolução sem spoiler do resultado final.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form id="chat-form" onsubmit="handleChatSubmit(event)" class="mt-3 flex gap-2">
+                                    <input type="text" id="chat-input" placeholder="Ex: Como resolver problemas de contagem ou Leis de Kepler..." required class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                                    <button type="submit" class="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-4 py-2.5 rounded-xl text-xs transition flex items-center gap-1">
+                                        <i class="fa-solid fa-location-arrow"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- GAMIFICAÇÃO & RANKING -->
+                    <div class="space-y-8">
+                        <div class="glass-card rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4 mb-6">
+                                <div class="bg-amber-600/20 text-amber-400 p-2.5 rounded-xl border border-amber-500/20">
+                                    <i class="fa-solid fa-trophy text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-white">Medalhas de Estudo</h3>
+                                    <p class="text-xs text-slate-400">Conquistas desbloqueadas.</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3" id="badges-grid"></div>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4 mb-6">
+                                <div class="bg-emerald-600/20 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/20">
+                                    <i class="fa-solid fa-ranking-star text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-white">Ranking da Semana</h3>
+                                    <p class="text-xs text-slate-400">Pontuação acumulada no estudo.</p>
+                                </div>
+                            </div>
+                            <div id="leaderboard-container" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ABA OBA (ASTRONOMIA) -->
+            <div id="content-tab-oba" class="olympiad-tab-content hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-indigo-500/30">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-meteor text-3xl text-indigo-400"></i>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Olimpíada Brasileira de Astronomia e Astronáutica (OBA)</h3>
+                            <p class="text-xs text-slate-400">Módulos de física astronômica, gravitação e exploração espacial.</p>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <h4 class="font-bold text-sm text-indigo-300 mb-2">Trilha Recomendada</h4>
+                            <ul class="text-xs text-slate-400 space-y-2">
+                                <li>• Leis de Kepler e Órbitas Planetárias</li>
+                                <li>• Fases da Lua e Eclipses</li>
+                                <li>• Constelações e Cartografia Celeste</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-indigo-300 mb-1">Apostilas & ProvasAnteriores</h4>
+                                <p class="text-xs text-slate-400">Acesse gabaritos e exames comentados.</p>
+                            </div>
+                            <button onclick="openMaterialsModal('oba')" class="mt-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 rounded-lg transition">Acessar Banco de Dados OBA</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA OBMEP (MATEMÁTICA) -->
+            <div id="content-tab-obmep" class="olympiad-tab-content hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-violet-500/30">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-calculator text-3xl text-violet-400"></i>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Olimpíada Brasileira de Matemática das Escolas Públicas (OBMEP)</h3>
+                            <p class="text-xs text-slate-400">Raciocínio lógico, combinatória, geometria e álgebra avançada.</p>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <h4 class="font-bold text-sm text-violet-300 mb-2">Tópicos Recorrentes</h4>
+                            <ul class="text-xs text-slate-400 space-y-2">
+                                <li>• Princípio Multiplicativo e Paridade</li>
+                                <li>• Teorema de Pitágoras e Áreas</li>
+                                <li>• Lógica de Argumentação e Padrões</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-violet-300 mb-1">Banco de Questões</h4>
+                                <p class="text-xs text-slate-400">Exames da 1ª e 2ª Fase organizados por nível.</p>
+                            </div>
+                            <button onclick="openMaterialsModal('obmep')" class="mt-3 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold py-2 rounded-lg transition">Acessar Banco OBMEP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA OBR (ROBÓTICA) -->
+            <div id="content-tab-obr" class="olympiad-tab-content hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-emerald-500/30">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-robot text-3xl text-emerald-400"></i>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Olimpíada Brasileira de Robótica (OBR)</h3>
+                            <p class="text-xs text-slate-400">Programação, lógica de sensores e mecânica de robôs autônomos.</p>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <h4 class="font-bold text-sm text-emerald-300 mb-2">Modalidade Teórica</h4>
+                            <ul class="text-xs text-slate-400 space-y-2">
+                                <li>• Algoritmos e Fluxogramas</li>
+                                <li>• Sensores de Cor, Ultrassom e Toque</li>
+                                <li>• Engrenagens e Redução Mecânica</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-emerald-300 mb-1">Provas Anteriores</h4>
+                                <p class="text-xs text-slate-400">Cadernos de prova e simulados teóricos.</p>
+                            </div>
+                            <button onclick="openMaterialsModal('obr')" class="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 rounded-lg transition">Acessar Materiais OBR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA ONEE (EFICIÊNCIA ENERGÉTICA) -->
+            <div id="content-tab-onee" class="olympiad-tab-content hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-amber-500/30">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-bolt text-3xl text-amber-400"></i>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Olimpíada Nacional de Eficiência Energética (ONEE)</h3>
+                            <p class="text-xs text-slate-400">Transformação de energia, consumo consciente e sustentabilidade.</p>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <h4 class="font-bold text-sm text-amber-300 mb-2">Eixos de Estudo</h4>
+                            <ul class="text-xs text-slate-400 space-y-2">
+                                <li>• Fontes Renováveis e Matriz Energética</li>
+                                <li>• Cálculo de Consumo e Potência (kWh)</li>
+                                <li>• Hábitos de Uso Consciente de Energia</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-amber-300 mb-1">Guia de Estudos</h4>
+                                <p class="text-xs text-slate-400">Módulos oficiais e listas de exercício.</p>
+                            </div>
+                            <button onclick="openMaterialsModal('onee')" class="mt-3 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold py-2 rounded-lg transition">Acessar Materiais ONEE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 Olympius. Todos os direitos reservados.</p>
+            <p class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-indigo-400"></i> Ambiente Protegido para Estudantes Olímpicos
+            </p>
+        </div>
+    </footer>
+
+    <!-- LÓGICA E ESTADO DA APLICAÇÃO (JAVASCRIPT) -->
+    <script>
+        // --- BASE DE DADOS DOS MATERIAIS ---
+        const materialsData = {
+            oba: {
+                title: "Materiais OBA (Astronomia)",
+                iconClass: "fa-solid fa-meteor text-indigo-400",
+                bgIconClass: "bg-indigo-600/20 text-indigo-400 border-indigo-500/30",
+                items: [
+                    { name: "Prova Nível 1 - 28ª OBA (2025)", type: "PDF", size: "138 KB", url: "assets/oba/prova-nivel-1-28-oba-2025.pdf" },
+                    { name: "Prova Nível 2 - 28ª OBA (2025)", type: "PDF", size: "152 KB", url: "assets/oba/prova-nivel-2-28-oba-2025.pdf" },
+                    { name: "Prova Nível 3 - 28ª OBA (2025)", type: "PDF", size: "338 KB", url: "assets/oba/prova-nivel-3-28-oba-2025.pdf" },
+                    { name: "Prova Nível 4 - 28ª OBA (2025)", type: "PDF", size: "308 KB", url: "assets/oba/prova-nivel-4-28-oba-2025.pdf" },
+                    { name: "Apostila Completa OBA - Nível 3 & 4", type: "PDF", size: "12.4 MB" },
+                    { name: "Provas Anteriores Gabaritadas (2020 - 2025)", type: "ZIP", size: "28.1 MB" },
+                    { name: "Resumo de Cartografia e Coordenadas Celestes", type: "PDF", size: "4.2 MB" }
+                ]
+            },
+            obmep: {
+                title: "Materiais OBMEP (Matemática)",
+                iconClass: "fa-solid fa-calculator text-violet-400",
+                bgIconClass: "bg-violet-600/20 text-violet-400 border-violet-500/30",
+                items: [
+                    { name: "Banco de Questões Resolvidas - 1ª e 2ª Fase", type: "PDF", size: "18.6 MB" },
+                    { name: "Apostila do PIC (Programa de Iniciação Científica)", type: "PDF", size: "9.3 MB" },
+                    { name: "Simulados Exclusivos de Contagem e Geometria", type: "PDF", size: "5.1 MB" }
+                ]
+            },
+            obr: {
+                title: "Materiais OBR (Robótica)",
+                iconClass: "fa-solid fa-robot text-emerald-400",
+                bgIconClass: "bg-emerald-600/20 text-emerald-400 border-emerald-500/30",
+                items: [
+                    { name: "Manual de Lógica e Programação para Robótica", type: "PDF", size: "8.7 MB" },
+                    { name: "Provas Teóricas OBR Anteriores Comentadas", type: "ZIP", size: "15.3 MB" },
+                    { name: "Guia Básico de Sensores e Atuadores", type: "PDF", size: "3.9 MB" }
+                ]
+            },
+            onee: {
+                title: "Materiais ONEE (Eficiência Energética)",
+                iconClass: "fa-solid fa-bolt text-amber-400",
+                bgIconClass: "bg-amber-600/20 text-amber-400 border-amber-500/30",
+                items: [
+                    { name: "Guia Oficial de Eficiência Energética e Consumo", type: "PDF", size: "6.5 MB" },
+                    { name: "Lista de Exercícios Práticos de Física Elétrica", type: "PDF", size: "2.8 MB" }
+                ]
+            }
+        };
+
+        // --- MOCK DE POSTS INICIAIS ---
+        const initialPosts = [
+            {
+                author: "Mister",
+                tag: "Resolução OBA/OBMEP",
+                content: "Em problemas de contagem da OBMEP, tente sempre fixar o elemento mais restrito primeiro. Isso simplifica as combinações restantes!",
+                likes: 12,
+                date: "Hoje às 10:15"
+            },
+            {
+                author: "Cauê",
+                tag: "Dica de Estudo",
+                content: "Usar blocos de 25min no Pomodoro focando apenas em questões da OBR me ajudou muito a fixar o conteúdo de sensores.",
+                likes: 8,
+                date: "Ontem às 18:40"
+            }
+        ];
+
+        // ============================================================
+        // SUPABASE — CONFIGURAÇÃO
+        // ============================================================
+        // IMPORTANTE:
+        // 1. Crie um projeto em https://supabase.com
+        // 2. Execute o arquivo supabase.sql que acompanha este projeto.
+        // 3. Cole aqui a URL do projeto e a PUBLISHABLE KEY (ou anon key).
+        // Nunca coloque a service_role key neste arquivo.
+        const SUPABASE_URL = "COLE_AQUI_A_URL_DO_SEU_PROJETO";
+        const SUPABASE_PUBLISHABLE_KEY = "COLE_AQUI_A_SUA_PUBLISHABLE_KEY";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+        // --- DADOS ESTÁTICOS DE DEMONSTRAÇÃO ---
+        const initialPosts = [
+            {
+                author: "Mister",
+                tag: "Resolução OBA/OBMEP",
+                content: "Em problemas de contagem da OBMEP, tente sempre fixar o elemento mais restrito primeiro. Isso simplifica as combinações restantes!",
+                likes: 12,
+                date: "Hoje às 10:15"
+            },
+            {
+                author: "Cauê",
+                tag: "Dica de Estudo",
+                content: "Usar blocos de 25min no Pomodoro focando apenas em questões da OBR me ajudou muito a fixar o conteúdo de sensores.",
+                likes: 8,
+                date: "Ontem às 18:40"
+            }
+        ];
+
+        // --- ESTADO DA APLICAÇÃO ---
+        let state = {
+            currentUser: null,
+            currentUserId: null,
+            user: null,
+            posts: [],
+            pomodoroTime: 1500,
+            pomodoroActive: false,
+            pomodoroTimerId: null
+        };
+
+        function isSupabaseConfigured() {
+            return SUPABASE_URL &&
+                   SUPABASE_PUBLISHABLE_KEY &&
+                   !SUPABASE_URL.includes("COLE_AQUI") &&
+                   !SUPABASE_PUBLISHABLE_KEY.includes("COLE_AQUI");
+        }
+
+        // --- INICIALIZAÇÃO ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!isSupabaseConfigured()) {
+                console.warn("Supabase ainda não foi configurado.");
+                state.posts = initialPosts;
+                renderApp();
+                showConfigMessage();
+                return;
+            }
+
+            await loadCurrentUser();
+            await loadPosts();
+            renderApp();
+
+            supabaseClient.auth.onAuthStateChange(async () => {
+                await loadCurrentUser();
+                await loadPosts();
+                renderApp();
+            });
+        });
+
+        function showConfigMessage() {
+            const loginMsg = document.getElementById('login-msg');
+            if (loginMsg) {
+                loginMsg.innerText = "Configure o SUPABASE_URL e a SUPABASE_PUBLISHABLE_KEY no arquivo.";
+                loginMsg.classList.remove('hidden');
+            }
+        }
+
+        async function loadCurrentUser() {
+            if (!isSupabaseConfigured()) return;
+
+            const { data: { user }, error: sessionError } =
+                await supabaseClient.auth.getUser();
+
+            if (sessionError || !user) {
+                state.currentUser = null;
+                state.currentUserId = null;
+                state.user = null;
+                return;
+            }
+
+            state.currentUserId = user.id;
+
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('id, username, xp, level, badges, created_at')
+                .eq('id', user.id)
+                .single();
+
+            if (error) {
+                console.error("Erro ao carregar perfil:", error);
+                state.currentUser = user.user_metadata?.username || user.email;
+                state.user = {
+                    id: user.id,
+                    username: user.user_metadata?.username || user.email,
+                    xp: 0,
+                    level: 1,
+                    badges: ["Iniciante Olímpico"]
+                };
+                return;
+            }
+
+            state.user = profile;
+            state.currentUser = profile.username;
+        }
+
+        async function loadPosts() {
+            if (!isSupabaseConfigured()) return;
+
+            const { data, error } = await supabaseClient
+                .from('posts')
+                .select(`
+                    id,
+                    user_id,
+                    type,
+                    content,
+                    likes,
+                    created_at,
+                    profiles(username)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Erro ao carregar posts:", error);
+                state.posts = initialPosts;
+                return;
+            }
+
+            state.posts = (data || []).map(post => ({
+                id: post.id,
+                user_id: post.user_id,
+                author: post.profiles?.username || "Usuário",
+                tag: post.type,
+                content: post.content,
+                likes: post.likes || 0,
+                date: formatPostDate(post.created_at)
+            }));
+        }
+
+        function formatPostDate(dateString) {
+            if (!dateString) return "Agora";
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderApp() {
+            updateUserStats();
+            renderFeed();
+            renderBadges();
+            renderLeaderboard();
+
+            const publicView = document.getElementById('public-view');
+            const portalView = document.getElementById('portal-view');
+            const guestActions = document.getElementById('nav-guest-actions');
+            const userActions = document.getElementById('nav-user-actions');
+            const navUser = document.getElementById('user-display-nav');
+
+            if (state.currentUser) {
+                publicView.classList.add('hidden');
+                portalView.classList.remove('hidden');
+                guestActions.classList.add('hidden');
+                userActions.classList.remove('hidden');
+                userActions.classList.add('flex');
+                navUser.innerText = state.currentUser;
+            } else {
+                publicView.classList.remove('hidden');
+                portalView.classList.add('hidden');
+                guestActions.classList.remove('hidden');
+                userActions.classList.add('hidden');
+                userActions.classList.remove('flex');
+            }
+        }
+
+        // --- AUTENTICAÇÃO ---
+        function openAuthModal(tab) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchAuthTab(tab);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            const regForm = document.getElementById('register-form');
+            const loginForm = document.getElementById('login-form');
+            const tabReg = document.getElementById('tab-register');
+            const tabLogin = document.getElementById('tab-login');
+
+            if (tab === 'register') {
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                tabReg.className = "flex-1 pb-3 font-semibold text-center text-indigo-400 border-b-2 border-indigo-500 transition";
+                tabLogin.className = "flex-1 pb-3 font-semibold text-center text-slate-400 border-b-2 border-transparent transition";
+            } else {
+                regForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                tabLogin.className = "flex-1 pb-3 font-semibold text-center text-indigo-400 border-b-2 border-indigo-500 transition";
+                tabReg.className = "flex-1 pb-3 font-semibold text-center text-slate-400 border-b-2 border-transparent transition";
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+
+            if (!isSupabaseConfigured()) {
+                alert("Configure o Supabase no arquivo antes de cadastrar.");
+                return;
+            }
+
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const pass = document.getElementById('reg-password').value;
+            const confirmPass = document.getElementById('reg-confirm-password').value;
+            const msgEl = document.getElementById('reg-msg');
+
+            if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)) {
+                msgEl.innerText = "Usuário: use 3–30 caracteres (letras, números, _, . ou -).";
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            if (pass !== confirmPass) {
+                msgEl.innerText = "As senhas não coincidem!";
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            if (pass.length < 6) {
+                msgEl.innerText = "A senha deve ter pelo menos 6 caracteres.";
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            msgEl.innerText = "Criando sua conta...";
+            msgEl.className = "text-xs text-center mt-2 text-slate-400 block";
+
+            // Verifica disponibilidade do nome antes do cadastro.
+            const { data: existingProfile, error: usernameCheckError } =
+                await supabaseClient
+                    .from('profiles')
+                    .select('id')
+                    .eq('username', username)
+                    .maybeSingle();
+
+            if (usernameCheckError) {
+                console.error(usernameCheckError);
+                msgEl.innerText = "Não foi possível verificar o nome de usuário.";
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            if (existingProfile) {
+                msgEl.innerText = "Nome de usuário já existe!";
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password: pass,
+                options: {
+                    data: {
+                        username
+                    }
+                }
+            });
+
+            if (error) {
+                console.error(error);
+                msgEl.innerText = translateSupabaseError(error.message);
+                msgEl.className = "text-xs text-center mt-2 text-rose-500 block";
+                return;
+            }
+
+            document.getElementById('register-form').reset();
+
+            if (data.session) {
+                await loadCurrentUser();
+                closeAuthModal();
+                renderApp();
+            } else {
+                msgEl.innerText = "Conta criada. Verifique seu e-mail para confirmar o cadastro e depois faça login.";
+                msgEl.className = "text-xs text-center mt-2 text-emerald-400 block";
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            if (!isSupabaseConfigured()) {
+                alert("Configure o Supabase no arquivo antes de entrar.");
+                return;
+            }
+
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const pass = document.getElementById('login-password').value;
+            const msgEl = document.getElementById('login-msg');
+
+            const { error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password: pass
+            });
+
+            if (error) {
+                msgEl.innerText = translateSupabaseError(error.message);
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            msgEl.classList.add('hidden');
+            closeAuthModal();
+            await loadCurrentUser();
+            await loadPosts();
+            renderApp();
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            state.currentUser = null;
+            state.currentUserId = null;
+            state.user = null;
+            renderApp();
+        }
+
+        function translateSupabaseError(message) {
+            const m = (message || "").toLowerCase();
+            if (m.includes("invalid login credentials")) return "E-mail ou senha incorretos!";
+            if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+            if (m.includes("user already registered")) return "Este e-mail já está cadastrado.";
+            if (m.includes("password")) return "A senha não atende aos requisitos.";
+            if (m.includes("rate limit")) return "Muitas tentativas. Aguarde um pouco e tente novamente.";
+            return "Não foi possível concluir a operação. Tente novamente.";
+        }
+
+        // --- GAMIFICAÇÃO & XP ---
+        async function addXP(amount) {
+            if (!state.currentUserId || !isSupabaseConfigured()) return;
+
+            const oldLevel = state.user?.level || 1;
+
+            const { data, error } = await supabaseClient.rpc('add_xp', {
+                amount: amount
+            });
+
+            if (error) {
+                console.error("Erro ao adicionar XP:", error);
+                return;
+            }
+
+            if (data) {
+                state.user = data;
+                state.currentUser = data.username;
+
+                if (data.level > oldLevel) {
+                    alert(`🎉 Parabéns, ${state.currentUser}! Você alcançou o Nível ${data.level}!`);
+                }
+            } else {
+                await loadCurrentUser();
+            }
+
+            renderApp();
+        }
+
+        async function updateUserStats() {
+            const countEl = document.getElementById('registered-users-count');
+            if (countEl && isSupabaseConfigured()) {
+                const { count, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!error) countEl.innerText = count || 0;
+            }
+
+            if (state.user) {
+                const currentXP = state.user.xp % 100;
+                const levelEl = document.getElementById('user-badge-level');
+                const xpEl = document.getElementById('xp-text-display');
+                const progressEl = document.getElementById('xp-progress-bar');
+                const nextLevelEl = document.getElementById('next-level-num');
+                const badgesEl = document.getElementById('user-badges-count');
+
+                if (levelEl) levelEl.innerText = `Nível ${state.user.level}`;
+                if (xpEl) xpEl.innerText = `${currentXP} / 100 XP`;
+                if (progressEl) progressEl.style.width = `${currentXP}%`;
+                if (nextLevelEl) nextLevelEl.innerText = `Nível ${state.user.level + 1}`;
+                if (badgesEl) badgesEl.innerText = state.user.badges ? state.user.badges.length : 1;
+            }
+        }
+
+        function renderBadges() {
+            const container = document.getElementById('badges-grid');
+            if (!container) return;
+
+            const xp = state.user?.xp || 0;
+            const level = state.user?.level || 1;
+
+            const badgesList = [
+                { name: "Iniciante", desc: "Cadastrou na plataforma", icon: "fa-seedling", active: true },
+                { name: "Foco Total", desc: "Completou um Pomodoro", icon: "fa-clock", active: xp >= 50 },
+                { name: "Mentor", desc: "Publicou no Feed", icon: "fa-pen-to-square", active: xp >= 30 },
+                { name: "Olimpista Mestre", desc: "Atingiu Nível 3", icon: "fa-trophy", active: level >= 3 }
+            ];
+
+            container.innerHTML = badgesList.map(b => `
+                <div class="p-3 rounded-xl border ${b.active ? 'bg-indigo-600/10 border-indigo-500/30 text-indigo-300' : 'bg-slate-950/40 border-slate-800 text-slate-600'} flex items-center gap-2.5">
+                    <i class="fa-solid ${b.icon} text-lg"></i>
+                    <div>
+                        <div class="text-xs font-bold">${b.name}</div>
+                        <div class="text-[10px] opacity-75">${b.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            if (!container) return;
+
+            if (!isSupabaseConfigured()) {
+                const sortedUsers = [
+                    { name: "Mister", xp: 120, level: 2 }
+                ];
+                container.innerHTML = sortedUsers.map((u, index) => `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full font-extrabold text-xs flex items-center justify-center bg-amber-500 text-slate-950">${index + 1}</span>
+                            <span class="text-xs font-semibold text-slate-200">${u.name}</span>
+                        </div>
+                        <span class="text-xs font-bold text-indigo-400">${u.xp} XP</span>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('username, xp, level')
+                .order('xp', { ascending: false })
+                .limit(5);
+
+            if (error) {
+                console.error("Erro no ranking:", error);
+                return;
+            }
+
+            container.innerHTML = (data || []).map((u, index) => `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full font-extrabold text-xs flex items-center justify-center ${index === 0 ? 'bg-amber-500 text-slate-950' : index === 1 ? 'bg-slate-300 text-slate-950' : 'bg-slate-800 text-slate-400'}">${index + 1}</span>
+                        <span class="text-xs font-semibold text-slate-200">${escapeHtml(u.username)}</span>
+                    </div>
+                    <span class="text-xs font-bold text-indigo-400">${u.xp} XP</span>
+                </div>
+            `).join('');
+        }
+
+        // --- NAVEGAÇÃO ENTRE ABAS ---
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.olympiad-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.olympiad-tab-btn').forEach(btn => {
+                btn.className = "olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition";
+            });
+
+            const targetContent = document.getElementById(`content-tab-${tabId}`);
+            const targetNav = document.getElementById(`nav-tab-${tabId}`);
+
+            if (targetContent) targetContent.classList.remove('hidden');
+            if (targetNav) targetNav.className = "olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 bg-indigo-600 text-white transition";
+        }
+
+        // --- MENU DROPDOWN & MODAL DE MATERIAIS ---
+        function toggleDotsMenu() {
+            document.getElementById('dots-dropdown').classList.toggle('hidden');
+        }
+
+        function openMaterialsModal(key) {
+            const modal = document.getElementById('materials-modal');
+            const data = materialsData[key];
+            if (!data) return;
+
+            document.getElementById('materials-title').innerText = data.title;
+            document.getElementById('materials-icon').className = `p-3 rounded-xl border ${data.bgIconClass}`;
+            document.getElementById('materials-icon').innerHTML = `<i class="${data.iconClass} text-xl"></i>`;
+
+            const listContainer = document.getElementById('materials-list');
+            listContainer.innerHTML = data.items.map(item => `
+                <div class="flex items-center justify-between p-3.5 bg-slate-950 border border-slate-800 rounded-xl hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-regular fa-file-pdf text-indigo-400 text-lg"></i>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-200">${item.name}</p>
+                            <span class="text-[10px] text-slate-500">${item.type} • ${item.size}</span>
+                        </div>
+                    </div>
+                    ${item.url
+                        ? `<a href="${item.url}" download class="p-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs transition"><i class="fa-solid fa-download"></i></a>`
+                        : `<button onclick="alert('Iniciando download do material...')" class="p-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs transition"><i class="fa-solid fa-download"></i></button>`
+                    }
+                </div>
+            `).join('');
+
+            document.getElementById('dots-dropdown').classList.add('hidden');
+            modal.classList.remove('hidden');
+        }
+
+        function closeMaterialsModal() {
+            document.getElementById('materials-modal').classList.add('hidden');
+        }
+
+        // --- CRONÔMETRO POMODORO ---
+        function togglePomodoro() {
+            const btn = document.getElementById('pomo-start-btn');
+            if (state.pomodoroActive) {
+                clearInterval(state.pomodoroTimerId);
+                state.pomodoroActive = false;
+                btn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Iniciar`;
+                btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition";
+            } else {
+                state.pomodoroActive = true;
+                btn.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> Pausar`;
+                btn.className = "bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition";
+
+                state.pomodoroTimerId = setInterval(() => {
+                    if (state.pomodoroTime > 0) {
+                        state.pomodoroTime--;
+                        updatePomodoroDisplay();
+                    } else {
+                        clearInterval(state.pomodoroTimerId);
+                        state.pomodoroActive = false;
+                        alert('⏰ Fim do ciclo de estudos! +50 XP conquistados!');
+                        addXP(50);
+                        resetPomodoro();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetPomodoro() {
+            clearInterval(state.pomodoroTimerId);
+            state.pomodoroActive = false;
+            state.pomodoroTime = 1500;
+            updatePomodoroDisplay();
+            const btn = document.getElementById('pomo-start-btn');
+            btn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Iniciar`;
+            btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition";
+        }
+
+        function updatePomodoroDisplay() {
+            const minutes = Math.floor(state.pomodoroTime / 60);
+            const seconds = state.pomodoroTime % 60;
+            document.getElementById('pomodoro-timer').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // --- FEED DE POSTS ---
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feed-posts-container');
+            if (!container) return;
+
+            container.innerHTML = state.posts.map((post, idx) => `
+                <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-indigo-400">${escapeHtml(post.author)}</span>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-medium">${escapeHtml(post.tag)}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-500">${escapeHtml(post.date)}</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(post.content)}</p>
+                    <div class="flex items-center justify-end pt-1">
+                        <button onclick="likePost('${post.id}')" class="text-xs text-slate-400 hover:text-rose-400 transition flex items-center gap-1.5">
+                            <i class="fa-regular fa-heart text-xs"></i> <span>${post.likes}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handlePostSubmit(e) {
+            e.preventDefault();
+
+            if (!state.currentUserId) {
+                alert('Faça login para publicar no feed!');
+                return;
+            }
+
+            const tag = document.getElementById('post-type').value;
+            const content = document.getElementById('post-content').value.trim();
+
+            if (!content) return;
+
+            const { error } = await supabaseClient
+                .from('posts')
+                .insert({
+                    user_id: state.currentUserId,
+                    type: tag,
+                    content
+                });
+
+            if (error) {
+                console.error(error);
+                alert("Não foi possível publicar. Tente novamente.");
+                return;
+            }
+
+            document.getElementById('post-content').value = '';
+            await addXP(30);
+            await loadPosts();
+            renderFeed();
+        }
+
+        async function likePost(postId) {
+            if (!isSupabaseConfigured()) return;
+
+            const { error } = await supabaseClient.rpc('like_post', {
+                post_id: postId
+            });
+
+            if (error) {
+                console.error("Erro ao curtir post:", error);
+                return;
+            }
+
+            await loadPosts();
+            renderFeed();
+        }
+
+        // --- CHATBOT TUTOR (OLYMBOT) ---
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatBox = document.getElementById('chat-box');
+
+            // Mensagem do usuário
+            chatBox.innerHTML += `
+                <div class="flex items-start gap-2.5 justify-end">
+                    <div class="bg-indigo-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-[85%] text-xs leading-relaxed">
+                        ${escapeHtml(message)}
+                    </div>
+                </div>
+            `;
+
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Resposta Simulada do Tutor Pedagógico
+            setTimeout(() => {
+                let responseText = "Boa pergunta! Para resolver essa questão, tente primeiro identificar as variáveis dadas e aplicar o princípio fundamental da área antes de fazer os cálculos.";
+                
+                if (message.toLowerCase().includes("kepler") || message.toLowerCase().includes("oba")) {
+                    responseText = "Na OBA, lembre-se da 3ª Lei de Kepler: o quadrado do período orbital é proporcional ao cubo do semi-eixo maior ($T^2 \\propto a^3$). Tente comparar as razões!";
+                } else if (message.toLowerCase().includes("contagem") || message.toLowerCase().includes("obmep")) {
+                    responseText = "Na OBMEP, ao resolver problemas de contagem, analise as restrições mais fortes primeiro para evitar contagens duplicadas.";
+                }
+
+                chatBox.innerHTML += `
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center text-white text-xs shrink-0">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl rounded-tl-none text-slate-300 max-w-[85%] text-xs leading-relaxed">
+                            ${responseText}
+                        </div>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                if (state.currentUser) addXP(20);
+            }, 600);
+        }
+    </script>
+</body>
+</html>
