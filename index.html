@@ -323,7 +323,7 @@
                                 </div>
                             </form>
 
-                            <div id="feed-posts-container" class="space-y-4 max-h-[420px] overflow-y-auto pr-1"></div>
+                            <div id="feed-posts-container" class="space-y-4 max-h-[480px] overflow-y-auto pr-1"></div>
                         </div>
 
                         <!-- 2. TUTOR OLYMBOT IA -->
@@ -608,7 +608,7 @@
             });
         }
 
-        // --- 5. FEED EM TEMPO REAL ---
+        // --- 5. FEED EM TEMPO REAL COM INTERAÇÕES (CURTIDAS E COMENTÁRIOS) ---
         function listenToFeed() {
             db.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
                 const container = document.getElementById('feed-posts-container');
@@ -617,15 +617,49 @@
 
                 snapshot.forEach(doc => {
                     const post = doc.data();
+                    const postId = doc.id;
+                    const likes = post.likes || [];
+                    const currentUserId = auth.currentUser ? auth.currentUser.uid : '';
+                    const hasLiked = likes.includes(currentUserId);
+                    const commentsCount = post.commentsCount || 0;
+
                     container.innerHTML += `
-                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl space-y-2">
+                        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl space-y-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs font-bold text-indigo-400">${post.author}</span>
                                     <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">${post.tag || 'Dica'}</span>
                                 </div>
                             </div>
+                            
                             <p class="text-xs text-slate-300 leading-relaxed">${post.content}</p>
+                            
+                            <!-- BOTÕES DE INTERAÇÃO -->
+                            <div class="flex items-center gap-4 pt-2 border-t border-slate-800/60 text-xs">
+                                <button onclick="toggleLike('${postId}')" class="flex items-center gap-1.5 ${hasLiked ? 'text-rose-500 font-bold' : 'text-slate-400 hover:text-rose-400'} transition">
+                                    <i class="${hasLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                                    <span>${likes.length}</span>
+                                </button>
+                                
+                                <button onclick="toggleCommentsSection('${postId}')" class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-400 transition">
+                                    <i class="fa-regular fa-comment"></i>
+                                    <span id="comment-count-${postId}">${commentsCount}</span>
+                                </button>
+                            </div>
+
+                            <!-- SEÇÃO DE COMENTÁRIOS (OCULTA POR PADRÃO) -->
+                            <div id="comments-section-${postId}" class="hidden space-y-3 pt-2 border-t border-slate-900">
+                                <div id="comments-list-${postId}" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                    <p class="text-[11px] text-slate-500 italic">Carregando comentários...</p>
+                                </div>
+                                
+                                <form onsubmit="handleCommentSubmit(event, '${postId}')" class="flex gap-2">
+                                    <input type="text" id="comment-input-${postId}" placeholder="Escreva um comentário..." required class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition">
+                                        Enviar
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     `;
                 });
@@ -644,10 +678,97 @@
                 author: currentUserData.username,
                 tag: tag,
                 content: content,
+                likes: [],
+                commentsCount: 0,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
             await addXP(30);
+            input.value = '';
+        }
+
+        async function toggleLike(postId) {
+            if (!auth.currentUser) return;
+            const userId = auth.currentUser.uid;
+            const postRef = db.collection('posts').doc(postId);
+            
+            const doc = await postRef.get();
+            if (!doc.exists) return;
+
+            const likes = doc.data().likes || [];
+            if (likes.includes(userId)) {
+                await postRef.update({
+                    likes: firebase.firestore.FieldValue.arrayRemove(userId)
+                });
+            } else {
+                await postRef.update({
+                    likes: firebase.firestore.FieldValue.arrayUnion(userId)
+                });
+                await addXP(5); // +5 XP por curtir uma publicação
+            }
+        }
+
+        function toggleCommentsSection(postId) {
+            const section = document.getElementById(`comments-section-${postId}`);
+            if (!section) return;
+
+            const isHidden = section.classList.contains('hidden');
+            if (isHidden) {
+                section.classList.remove('hidden');
+                listenToComments(postId);
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        function listenToComments(postId) {
+            db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                const listEl = document.getElementById(`comments-list-${postId}`);
+                const countEl = document.getElementById(`comment-count-${postId}`);
+                if (!listEl) return;
+
+                if (countEl) countEl.innerText = snapshot.size;
+
+                if (snapshot.empty) {
+                    listEl.innerHTML = `<p class="text-[11px] text-slate-500">Nenhum comentário ainda. Seja o primeiro!</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const c = doc.data();
+                    listEl.innerHTML += `
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[11px] font-bold text-indigo-300">${c.author}</span>
+                            </div>
+                            <p class="text-xs text-slate-300">${c.content}</p>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        async function handleCommentSubmit(e, postId) {
+            e.preventDefault();
+            const input = document.getElementById(`comment-input-${postId}`);
+            const content = input.value.trim();
+
+            if (!content || !auth.currentUser || !currentUserData) return;
+
+            const postRef = db.collection('posts').doc(postId);
+
+            await postRef.collection('comments').add({
+                author: currentUserData.username,
+                content: content,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            await postRef.update({
+                commentsCount: firebase.firestore.FieldValue.increment(1)
+            });
+
+            await addXP(10); // +10 XP por comentar
             input.value = '';
         }
 
