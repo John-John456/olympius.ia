@@ -4,13 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Olympius | Plataforma de Estudos de Alta Performance</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- FontAwesome Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- MathJax (Renderização de LaTeX / Fórmulas Matemáticas) -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <!-- SDKs do Firebase (Versão Compatível via CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -23,6 +35,21 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white min-h-screen flex flex-col justify-between">
@@ -30,7 +57,7 @@
     <!-- HEADER / NAVBAR -->
     <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
                 <div class="bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-400 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20">
                     <i class="fa-solid fa-graduation-cap text-xl"></i>
                 </div>
@@ -45,8 +72,8 @@
                 <a href="#recursos" class="hover:text-indigo-400 transition flex items-center gap-2"><i class="fa-solid fa-bolt text-xs"></i> Recursos</a>
                 
                 <!-- MENU 3 PONTINHOS -->
-                <div class="relative">
-                    <button id="dots-menu-btn" onclick="toggleDotsMenu()" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:text-indigo-400 text-slate-300 transition flex items-center justify-center">
+                <div class="relative" id="dots-menu-container">
+                    <button id="dots-menu-btn" onclick="toggleDotsMenu(event)" class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 hover:text-indigo-400 text-slate-300 transition flex items-center justify-center">
                         <i class="fa-solid fa-ellipsis-vertical text-base"></i>
                     </button>
 
@@ -449,7 +476,7 @@
         </div>
     </footer>
 
-    <!-- LOGICA E FIREBASE BANCO DE DADOS -->
+    <!-- LÓGICA E FIREBASE BANCO DE DADOS -->
     <script>
         // --- 1. CONFIGURAÇÃO DO SEU PROJETO FIREBASE ---
         const firebaseConfig = {
@@ -675,7 +702,6 @@
 
             if (!content || !auth.currentUser) return;
 
-            // Garantir que o nome de usuário seja recuperado diretamente
             const authorName = (currentUserData && currentUserData.username) ? currentUserData.username : "Estudante";
 
             await db.collection('posts').add({
@@ -709,7 +735,7 @@
                 await postRef.update({
                     likes: firebase.firestore.FieldValue.arrayUnion(userId)
                 });
-                await addXP(5); // +5 XP por curtir uma publicação
+                await addXP(5);
             }
         }
 
@@ -775,7 +801,7 @@
                 commentsCount: firebase.firestore.FieldValue.increment(1)
             });
 
-            await addXP(10); // +10 XP por comentar
+            await addXP(10);
             input.value = '';
         }
 
@@ -803,7 +829,7 @@
             });
         }
 
-        // --- 7. CHATBOT OLYMBOT ---
+        // --- 7. CHATBOT OLYMBOT (COM SUPORTE A MATHJAX) ---
         function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
@@ -824,22 +850,33 @@
 
             setTimeout(() => {
                 let responseText = "Para resolver essa questão, identifique as variáveis dadas e aplique os princípios fundamentais antes do cálculo.";
-                if (message.toLowerCase().includes("kepler") || message.toLowerCase().includes("oba")) {
-                    responseText = "Na OBA, lembre-se da 3ª Lei de Kepler: $T^2 \\propto a^3$. Compare a proporção dos períodos e dos semieixos!";
-                } else if (message.toLowerCase().includes("contagem") || message.toLowerCase().includes("obmep")) {
-                    responseText = "Na OBMEP, ao resolver contagem, fixe o elemento com mais restrições primeiro para não duplicar soluções.";
+                const lowerMsg = message.toLowerCase();
+                
+                if (lowerMsg.includes("kepler") || lowerMsg.includes("oba") || lowerMsg.includes("astronomia")) {
+                    responseText = "Na OBA, lembre-se da 3ª Lei de Kepler: $T^2 \\propto a^3$. Compare a proporção dos períodos e dos semieixos para resolver questões de órbita!";
+                } else if (lowerMsg.includes("contagem") || lowerMsg.includes("obmep") || lowerMsg.includes("matematica")) {
+                    responseText = "Na OBMEP, ao resolver problemas de contagem ou combinatória, fixe o elemento com mais restrições primeiro para não duplicar contagens.";
+                } else if (lowerMsg.includes("robo") || lowerMsg.includes("obr")) {
+                    responseText = "Na OBR, atente-se à lógica dos sensores de cor e reflexão de luz, garantindo calibração contra ruídos do ambiente.";
                 }
 
+                const responseId = `chat-resp-${Date.now()}`;
                 chatBox.innerHTML += `
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center text-white text-xs shrink-0">
                             <i class="fa-solid fa-robot"></i>
                         </div>
-                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl rounded-tl-none text-slate-300 max-w-[85%] text-xs leading-relaxed">
+                        <div id="${responseId}" class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl rounded-tl-none text-slate-300 max-w-[85%] text-xs leading-relaxed">
                             ${responseText}
                         </div>
                     </div>
                 `;
+                
+                // Processar LaTeX via MathJax se disponível
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([document.getElementById(responseId)]).catch(err => console.log(err));
+                }
+
                 chatBox.scrollTop = chatBox.scrollHeight;
                 addXP(20);
             }, 600);
@@ -899,9 +936,19 @@
             if (targetNav) targetNav.className = "olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 bg-indigo-600 text-white transition";
         }
 
-        function toggleDotsMenu() {
+        function toggleDotsMenu(e) {
+            if (e) e.stopPropagation();
             document.getElementById('dots-dropdown').classList.toggle('hidden');
         }
+
+        // Fechar dropdown ao clicar fora
+        window.addEventListener('click', function(e) {
+            const container = document.getElementById('dots-menu-container');
+            const dropdown = document.getElementById('dots-dropdown');
+            if (container && !container.contains(e.target) && dropdown) {
+                dropdown.classList.add('hidden');
+            }
+        });
 
         function openMaterialsModal(key) {
             const modal = document.getElementById('materials-modal');
@@ -949,9 +996,13 @@
             if (tab === 'register') {
                 document.getElementById('register-form').classList.remove('hidden');
                 document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('tab-register').className = "flex-1 pb-3 font-semibold text-center text-indigo-400 border-b-2 border-indigo-500 transition";
+                document.getElementById('tab-login').className = "flex-1 pb-3 font-semibold text-center text-slate-400 border-b-2 border-transparent transition";
             } else {
                 document.getElementById('register-form').classList.add('hidden');
                 document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('tab-login').className = "flex-1 pb-3 font-semibold text-center text-indigo-400 border-b-2 border-indigo-500 transition";
+                document.getElementById('tab-register').className = "flex-1 pb-3 font-semibold text-center text-slate-400 border-b-2 border-transparent transition";
             }
         }
     </script>
