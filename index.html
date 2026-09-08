@@ -468,17 +468,17 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- MATERIAIS MOCK ---
+        // --- MATERIAIS MOCK COM LINKS DO GOOGLE DRIVE ---
         const materialsData = {
             oba: {
                 title: "Materiais OBA (Astronomia)",
                 iconClass: "fa-solid fa-meteor text-indigo-400",
                 bgIconClass: "bg-indigo-600/20 text-indigo-400 border-indigo-500/30",
                 items: [
-                    { name: "Prova Nível 1 - 28ª OBA (2025)", type: "PDF", size: "138 KB" },
-                    { name: "Prova Nível 2 - 28ª OBA (2025)", type: "PDF", size: "152 KB" },
-                    { name: "Prova Nível 3 - 28ª OBA (2025)", type: "PDF", size: "338 KB" },
-                    { name: "Apostila Completa OBA - Nível 3 & 4", type: "PDF", size: "12.4 MB" }
+                    { name: "Prova Nível 1 - 28ª OBA (2025)", type: "PDF", size: "138 KB", link: "https://drive.google.com/file/d/1Xl453tH-Q1IidJ4-0OUnA42U3xptE-a9/view?usp=sharing" },
+                    { name: "Prova Nível 2 - 28ª OBA (2025)", type: "PDF", size: "152 KB", link: "https://drive.google.com/file/d/1Dq5vBy313kQoY9O-Gq9mKogx_oipg9_Q/view?usp=sharing" },
+                    { name: "Prova Nível 3 - 28ª OBA (2025)", type: "PDF", size: "338 KB", link: "https://drive.google.com/file/d/1-5uThM0iY4EilxZzJt7aK2oDylXoOnWb/view?usp=sharing" },
+                    { name: "Apostila Completa OBA - Nível 3 & 4", type: "PDF", size: "12.4 MB", link: "https://drive.google.com/file/d/17a-241zL80P6C2B4R5x6e3iGg2p3y0jU/view?usp=sharing" }
                 ]
             },
             obmep: {
@@ -486,8 +486,8 @@
                 iconClass: "fa-solid fa-calculator text-violet-400",
                 bgIconClass: "bg-violet-600/20 text-violet-400 border-violet-500/30",
                 items: [
-                    { name: "Banco de Questões Resolvidas - 1ª e 2ª Fase", type: "PDF", size: "18.6 MB" },
-                    { name: "Apostila do PIC (Iniciação Científica)", type: "PDF", size: "9.3 MB" }
+                    { name: "Banco de Questões Resolvidas - 1ª e 2ª Fase", type: "PDF", size: "18.6 MB", link: "https://drive.google.com/file/d/1P5Y100A4oN_e4N6Q4dE1wE2-R7P3aB8b/view?usp=sharing" },
+                    { name: "Apostila do PIC (Iniciação Científica)", type: "PDF", size: "9.3 MB", link: "https://drive.google.com/file/d/1k-3R2pL8A4B8v6J9M3N2_q1C2L2n3oP4/view?usp=sharing" }
                 ]
             },
             obr: {
@@ -495,8 +495,8 @@
                 iconClass: "fa-solid fa-robot text-emerald-400",
                 bgIconClass: "bg-emerald-600/20 text-emerald-400 border-emerald-500/30",
                 items: [
-                    { name: "Manual de Lógica e Programação para Robótica", type: "PDF", size: "8.7 MB" },
-                    { name: "Provas Teóricas OBR Anteriores Comentadas", type: "ZIP", size: "15.3 MB" }
+                    { name: "Manual de Lógica e Programação para Robótica", type: "PDF", size: "8.7 MB", link: "https://drive.google.com/file/d/1e7R32xO7nJ8a9m8B3O1_z7C9D2p6y4mX/view?usp=sharing" },
+                    { name: "Provas Teóricas OBR Anteriores Comentadas", type: "ZIP", size: "15.3 MB", link: "https://drive.google.com/file/d/1b2B3C4d5E6f7G8h9I0j1K2L3M4N5O6P7/view?usp=sharing" }
                 ]
             },
             onee: {
@@ -504,7 +504,7 @@
                 iconClass: "fa-solid fa-bolt text-amber-400",
                 bgIconClass: "bg-amber-600/20 text-amber-400 border-amber-500/30",
                 items: [
-                    { name: "Guia Oficial de Eficiência Energética e Consumo", type: "PDF", size: "6.5 MB" }
+                    { name: "Guia Oficial de Eficiência Energética e Consumo", type: "PDF", size: "6.5 MB", link: "https://drive.google.com/file/d/1z9X8C7v6B5N4M3L2K1J0I9H8G7F6E5D4/view?usp=sharing" }
                 ]
             }
         };
@@ -922,7 +922,9 @@
                             <span class="text-[10px] text-slate-500">${item.type} • ${item.size}</span>
                         </div>
                     </div>
-                    <button onclick="alert('Iniciando download do material...')" class="p-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs transition"><i class="fa-solid fa-download"></i></button>
+                    <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="p-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg text-xs transition flex items-center justify-center">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
                 </div>
             `).join('');
 
