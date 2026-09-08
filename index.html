@@ -76,12 +76,10 @@
             </nav>
 
             <div class="flex items-center space-x-4">
-                <!-- Estado Deslogado -->
                 <div id="nav-guest-actions" class="flex items-center space-x-4">
                     <button onclick="openAuthModal('login')" class="text-sm font-semibold text-slate-300 hover:text-white transition px-3 py-2">Entrar</button>
                     <button onclick="openAuthModal('register')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-600/30 transition">Cadastre-se</button>
                 </div>
-                <!-- Estado Logado -->
                 <div id="nav-user-actions" class="hidden items-center space-x-4">
                     <span class="text-sm text-slate-300">Olá, <strong id="user-display-nav" class="text-indigo-400">Usuário</strong></span>
                     <button onclick="logout()" class="bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold px-3.5 py-2 rounded-xl border border-slate-800 transition">Sair</button>
@@ -225,6 +223,10 @@
                 <button onclick="switchTab('dashboard')" id="nav-tab-dashboard" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 bg-indigo-600 text-white transition">
                     <i class="fa-solid fa-house text-sm w-5"></i>
                     <span>Visão Geral</span>
+                </button>
+                <button onclick="switchTab('admin')" id="nav-tab-admin" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved text-rose-400 text-sm w-5"></i>
+                    <span>Painel Admin / Moderação</span>
                 </button>
                 <button onclick="switchTab('oba')" id="nav-tab-oba" class="olympiad-tab-btn w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 text-slate-400 hover:text-white hover:bg-slate-800 transition">
                     <i class="fa-solid fa-meteor text-indigo-400 text-sm w-5"></i>
@@ -377,6 +379,28 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            <!-- TAB PAINEL ADMIN DE MODERAÇÃO -->
+            <div id="content-tab-admin" class="olympiad-tab-content hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-rose-500/30">
+                    <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
+                        <div class="p-3 bg-rose-600/20 text-rose-400 rounded-xl border border-rose-500/30">
+                            <i class="fa-solid fa-shield-halved text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Painel de Moderação & Gestão de Comentários</h3>
+                            <p class="text-xs text-slate-400">Gerencie conteúdos do feed e remova comentários inadequados diretamente do banco em tempo real.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-bold text-slate-300">Todas as Publicações Recentes</h4>
+                        <div id="admin-posts-list" class="space-y-4">
+                            <!-- Inserido dinamicamente via JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -540,6 +564,7 @@
 
                 listenToFeed();
                 listenToLeaderboard();
+                listenToAdminPosts();
             } else {
                 currentUserData = null;
                 document.getElementById('public-view').classList.remove('hidden');
@@ -609,7 +634,7 @@
             });
         }
 
-        // --- 5. FEED EM TEMPO REAL COM INTERAÇÕES (CURTIDAS E COMENTÁRIOS) ---
+        // --- 5. FEED EM TEMPO REAL COM INTERAÇÕES ---
         function listenToFeed() {
             db.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
                 const container = document.getElementById('feed-posts-container');
@@ -648,7 +673,7 @@
                                 </button>
                             </div>
 
-                            <!-- SEÇÃO DE COMENTÁRIOS (OCULTA POR PADRÃO) -->
+                            <!-- SEÇÃO DE COMENTÁRIOS -->
                             <div id="comments-section-${postId}" class="hidden space-y-3 pt-2 border-t border-slate-900">
                                 <div id="comments-list-${postId}" class="space-y-2 max-h-40 overflow-y-auto pr-1">
                                     <p class="text-[11px] text-slate-500 italic">Carregando comentários...</p>
@@ -675,7 +700,6 @@
 
             if (!content || !auth.currentUser) return;
 
-            // Garantir que o nome de usuário seja recuperado diretamente
             const authorName = (currentUserData && currentUserData.username) ? currentUserData.username : "Estudante";
 
             await db.collection('posts').add({
@@ -709,7 +733,7 @@
                 await postRef.update({
                     likes: firebase.firestore.FieldValue.arrayUnion(userId)
                 });
-                await addXP(5); // +5 XP por curtir uma publicação
+                await addXP(5);
             }
         }
 
@@ -739,15 +763,23 @@
                     return;
                 }
 
+                const currentUserId = auth.currentUser ? auth.currentUser.uid : '';
+
                 listEl.innerHTML = '';
                 snapshot.forEach(doc => {
                     const c = doc.data();
+                    const commentId = doc.id;
+                    const isOwner = c.userId === currentUserId;
+
                     listEl.innerHTML += `
-                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-[11px] font-bold text-indigo-300">${c.author || 'Estudante'}</span>
+                        <div class="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80 flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold text-indigo-300 block mb-0.5">${c.author || 'Estudante'}</span>
+                                <p class="text-xs text-slate-300">${c.content}</p>
                             </div>
-                            <p class="text-xs text-slate-300">${c.content}</p>
+                            <button onclick="deleteComment('${postId}', '${commentId}')" title="Excluir Comentário" class="text-slate-500 hover:text-rose-400 text-xs transition p-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
                     `;
                 });
@@ -775,11 +807,104 @@
                 commentsCount: firebase.firestore.FieldValue.increment(1)
             });
 
-            await addXP(10); // +10 XP por comentar
+            await addXP(10);
             input.value = '';
         }
 
-        // --- 6. RANKING GLOBAL ---
+        // --- 6. FUNÇÃO DE MODERAÇÃO: EXCLUIR COMENTÁRIOS ---
+        async function deleteComment(postId, commentId) {
+            if (!confirm("Tem certeza que deseja excluir este comentário?")) return;
+
+            try {
+                const postRef = db.collection('posts').doc(postId);
+
+                // 1. Remove o documento do comentário
+                await postRef.collection('comments').doc(commentId).delete();
+
+                // 2. Decrementa o contador de comentários do post
+                await postRef.update({
+                    commentsCount: firebase.firestore.FieldValue.increment(-1)
+                });
+
+                alert("Comentário excluído com sucesso!");
+            } catch (error) {
+                console.error("Erro ao excluir comentário:", error);
+                alert("Erro ao excluir comentário. Tente novamente.");
+            }
+        }
+
+        // --- 7. PAINEL ADMIN: LISTAR E GERENCIAR POSTS E COMENTÁRIOS ---
+        function listenToAdminPosts() {
+            db.collection('posts').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+                const container = document.getElementById('admin-posts-list');
+                if (!container) return;
+                container.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    const post = doc.data();
+                    const postId = doc.id;
+
+                    container.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-white">${post.author || 'Estudante'}</span>
+                                    <span class="text-[10px] bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 px-2 py-0.5 rounded-full">${post.tag || 'Post'}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500">ID: ${postId}</span>
+                            </div>
+
+                            <p class="text-xs text-slate-300">${post.content}</p>
+
+                            <!-- ÁREA DE MODERAÇÃO DE COMENTÁRIOS DESTE POST -->
+                            <div class="mt-3 pt-3 border-t border-slate-950">
+                                <h5 class="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-comments text-indigo-400"></i> Comentários deste post:
+                                </h5>
+                                <div id="admin-comments-for-${postId}" class="space-y-2">
+                                    <p class="text-[11px] text-slate-500 italic">Carregando comentários...</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Carregar comentários de cada post no admin
+                    listenToAdminComments(postId);
+                });
+            });
+        }
+
+        function listenToAdminComments(postId) {
+            db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                const listEl = document.getElementById(`admin-comments-for-${postId}`);
+                if (!listEl) return;
+
+                if (snapshot.empty) {
+                    listEl.innerHTML = `<p class="text-[11px] text-slate-600 italic">Nenhum comentário nesta publicação.</p>`;
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const c = doc.data();
+                    const commentId = doc.id;
+
+                    listEl.innerHTML += `
+                        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 flex items-center justify-between">
+                            <div class="pr-2">
+                                <span class="text-[11px] font-bold text-indigo-400">${c.author}:</span>
+                                <span class="text-xs text-slate-300 ml-1">${c.content}</span>
+                            </div>
+                            <button onclick="deleteComment('${postId}', '${commentId}')" class="px-2 py-1 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white rounded text-[11px] font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // --- 8. RANKING GLOBAL ---
         function listenToLeaderboard() {
             db.collection('users').orderBy('xp', 'desc').limit(5).onSnapshot(snapshot => {
                 const container = document.getElementById('leaderboard-container');
@@ -803,7 +928,7 @@
             });
         }
 
-        // --- 7. CHATBOT OLYMBOT ---
+        // --- 9. CHATBOT OLYMBOT ---
         function handleChatSubmit(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
@@ -845,7 +970,7 @@
             }, 600);
         }
 
-        // --- 8. POMODORO ---
+        // --- 10. POMODORO ---
         function togglePomodoro() {
             const btn = document.getElementById('pomo-start-btn');
             if (pomodoroActive) {
