@@ -8,3 +8,7 @@
 3. Faça commit e push. O GitHub Pages atualiza em alguns minutos.
 
 O campo `size` é opcional (ex.: `size: "2 MB"`).
+
+## Materiais disponíveis
+
+A pasta `materiais/` agora inclui guias básicos de estudo para as principais olimpíadas científicas, com foco em aprendizagem, rotina e estratégias de resolução.
